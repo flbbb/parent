@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "parent"
+version = "0.1.0"
+description = ""
+authors = ["Clément Rebuffel <clement.rebuffel@lip6.fr>"]
+readme = "README.md"
+license="Apache"
+
+[tool.poetry.dependencies]
+python = ">=3"
+numpy = "^1.26.2"
+tqdm = "^4.66.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

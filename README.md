@@ -1,3 +1,5 @@
+This fork only packages the original code with a `pyproject.toml` to avoid using pkg_resources.
+
 # PARENT
 Code for [Handling Divergent Reference Texts when Evaluating Table-to-Text Generation](https://arxiv.org/abs/1906.01081).
 
