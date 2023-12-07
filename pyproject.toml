@@ -8,8 +8,8 @@ license="Apache"
 
 [tool.poetry.dependencies]
 python = ">=3"
-numpy = "^1.26.2"
-tqdm = "^4.66.1"
+numpy = ">=1.14"
+tqdm = ">=4.35"
 
 
 [build-system]
