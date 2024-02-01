@@ -4,18 +4,18 @@
 # I also added multi-precessing to greatly speedup the computations
 
 """Script to compute PARENT metric."""
-from functools import partial
-
-import tqdm.notebook as tqdm_notebook
-import multiprocessing as mp
-import numpy as np
+import argparse
 import collections
 import itertools
-import argparse
-import math
-import tqdm
 import json
+import math
+import multiprocessing as mp
 import os
+from functools import partial
+
+import numpy as np
+import tqdm
+import tqdm.notebook as tqdm_notebook
 
 
 def overlap_probability(ngram, table, smoothing=0.0, stopwords=None):
@@ -313,27 +313,41 @@ def _parent(predictions,
                       mention_fn=mention_fn)
     
     n_jobs = mp.cpu_count() if n_jobs < 0 else n_jobs
-    if _tqdm is not None:
-        print(f'Using {n_jobs} processes, starting now.')
-    with mp.Pool(processes=n_jobs) as pool:
-        _iterable = pool.imap(
-            _parent, 
-            zip(predictions, references, tables),
-            chunksize=n_jobs  # empirically seems to be the best, could be wrong though
-        )
-
+    if n_jobs > 1:
         if _tqdm is not None:
-            for p, r, f in _tqdm.tqdm(
-                    _iterable, total=len(tables), desc='Computing PARENT'):
-                precisions.append(p)
-                recalls.append(r)
-                all_f_scores.append(f)
+            print(f'Using {n_jobs} processes, starting now.')
+        with mp.Pool(processes=n_jobs) as pool:
+            _iterable = pool.imap(
+                _parent, 
+                zip(predictions, references, tables),
+                chunksize=n_jobs  # empirically seems to be the best, could be wrong though
+            )
+
+            if _tqdm is not None:
+                for p, r, f in _tqdm.tqdm(
+                        _iterable, total=len(tables), desc='Computing PARENT'):
+                    precisions.append(p)
+                    recalls.append(r)
+                    all_f_scores.append(f)
+            else:
+                
+                for p, r, f in _iterable:
+                    precisions.append(p)
+                    recalls.append(r)
+                    all_f_scores.append(f)
+    else:
+        if _tqdm is not None:
+            _iterable = _tqdm.tqdm(
+                zip(predictions, references, tables),
+                total=len(tables), desc='Computing PARENT')
         else:
+            _iterable = zip(predictions, references, tables)
             
-            for p, r, f in _iterable:
-                precisions.append(p)
-                recalls.append(r)
-                all_f_scores.append(f)
+        for pred, refs, table in _iterable:
+            p, r, f = _parent((pred, refs, table))
+            precisions.append(p)
+            recalls.append(r)
+            all_f_scores.append(f)
         
     return precisions, recalls, all_f_scores
 
